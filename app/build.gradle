@@ -1,6 +1,7 @@
 plugins {
   id 'com.android.application'
   id 'kotlin-android'
+  id 'kotlin-android-extensions'
 }
 
 android {
@@ -39,7 +40,26 @@ dependencies {
   implementation 'androidx.appcompat:appcompat:1.2.0'
   implementation 'com.google.android.material:material:1.2.1'
   implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-  testImplementation 'junit:junit:4.+'
+
+  implementation "androidx.recyclerview:recyclerview:$recycler_view"
+  implementation "com.github.bumptech.glide:glide:$glide"
+
+  //LifeCycle
+  implementation "androidx.lifecycle:lifecycle-common:$life_cycle"
+  implementation "androidx.lifecycle:lifecycle-runtime:$life_cycle"
+  implementation "android.arch.lifecycle:extensions:$life_cycle"
+  implementation "androidx.lifecycle:lifecycle-livedata-ktx:$life_cycle"
+
+  //Retrofit
+  implementation "com.squareup.retrofit2:retrofit:$retrofit"
+  implementation "com.google.code.gson:gson:$gson"
+  implementation "com.squareup.retrofit2:converter-gson:$gson_converter"
+  implementation "com.squareup.okhttp3:logging-interceptor:$okhttp"
+
+  //Coroutines
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
+
+  testImplementation 'junit:junit:4.13.1'
   androidTestImplementation 'androidx.test.ext:junit:1.1.2'
   androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
