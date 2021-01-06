@@ -44,6 +44,9 @@ dependencies {
   implementation "androidx.recyclerview:recyclerview:$recycler_view"
   implementation "com.github.bumptech.glide:glide:$glide"
 
+  //Benchmark
+  androidTestImplementation "androidx.benchmark:benchmark-junit4:1.0.0"
+
   //LifeCycle
   implementation "androidx.lifecycle:lifecycle-common:$life_cycle"
   implementation "androidx.lifecycle:lifecycle-runtime:$life_cycle"
