@@ -1,7 +1,9 @@
+import org.cyberneko.html.parsers.SAXParser
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext.kotlin_version = "1.3.72"
-    ext.http_version = "0.5.2"
+    ext.nekohtml_version = "1.9.16"
     repositories {
         google()
         jcenter()
@@ -9,14 +11,11 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:4.1.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.codehaus.groovy.modules.http-builder:http-builder:$http_version"
+        classpath "net.sourceforge.nekohtml:nekohtml:$nekohtml_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
-
-// import of HttpBuilder related stuff
-import groovyx.net.http.*
 
 allprojects {
     repositories {
@@ -29,17 +28,35 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-task getProfileOnDesktop() {
+task getProfileHtmlData() {
     doLast {
         def names = []
         fileTree("build/reports/profile").visit { FileVisitDetails details ->
-           if (details.name.contains("html")) {
-               names << details.file.path
-           }
+            if (details.name.contains("html")) {
+                names << details.file.path
+            }
         }
-        if (file(names.get(0)).exists())
-            println(file(names.get(0)).text)
+        def parser = new SAXParser()
+        if (names.size() > 0 && file(names.get(0)).exists()) {
+            new XmlParser(parser).parseText(file(names.get(0)).text).with { page->
+                List<Object> list = page.get("BODY")["DIV"]["DIV"]["DIV"]["TABLE"]
+                for (int i = 0; i < list.size(); i++) {
+                    List<Object> tr = list.get(i)["TBODY"]["TR"]
+                    for (int j = 0; j < tr.size(); j++) {
+                        List<Object> td = tr.get(j)["TD"]
+                        for (int k = 0; k < td.size(); k++) {
+                            Object object = td.get(k);
+                            print(object.text())
+                            if (k % 2 == 1) println() // Code formatting
+                            else print(" -> ")
+                        }
+                    }
+                }
+            }
+        } else {
+            print("No such file exists. Please build the profile prior to running this task")
         }
+    }
 }
 
 ext {
