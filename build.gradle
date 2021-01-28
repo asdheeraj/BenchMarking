@@ -37,6 +37,7 @@ task getProfileHtmlData() {
             }
         }
         def parser = new SAXParser()
+        def result = ""
         if (names.size() > 0 && file(names.get(0)).exists()) {
             new XmlParser(parser).parseText(file(names.get(0)).text).with { page->
                 List<Object> list = page.get("BODY")["DIV"]["DIV"]["DIV"]["TABLE"]
@@ -46,13 +47,36 @@ task getProfileHtmlData() {
                         List<Object> td = tr.get(j)["TD"]
                         for (int k = 0; k < td.size(); k++) {
                             Object object = td.get(k);
-                            print(object.text())
-                            if (k % 2 == 1) println() // Code formatting
-                            else print(" -> ")
+                            result = result + object.text();
+                            if (k % 2 == 1) result = result + "\n" // Code formatting
+                            else result = result + " -> "
                         }
                     }
                 }
             }
+            def array = result.split("\n");
+            def buildTimeArray = array[0].split(" -> ")
+            def startTimeArray = array[1].split(" -> ")
+            def builder = new groovy.json.JsonBuilder()
+            def buildTime = {
+                metric buildTimeArray[0].trim()
+                metric_value buildTimeArray[1].trim()
+            }
+            def startTime = {
+                metric startTimeArray[0].trim()
+                metric_value startTimeArray[1].trim()
+            }
+            def root = builder {
+                projectId 'mBenchMarking'
+                metric_data buildTime, startTime
+            }
+//            println(builder.toString().getBytes('UTF-8'))
+
+            def post = new URL("").openConnection() // TODO: Add the required URL
+            post.setRequestProperty("POST")
+            post.setDoOutput(true)
+            post.setRequestProperty("Content-Type", "application/json")
+            post.getOutputStream().write(builder.toString().getBytes('UTF-8'))
         } else {
             print("No such file exists. Please build the profile prior to running this task")
         }
