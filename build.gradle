@@ -57,18 +57,12 @@ task postProfileData() {
             def array = result.split("\n");
             def buildTimeArray = array[0].split(" -> ")
             def startTimeArray = array[1].split(" -> ")
-//            def builder = new groovy.json.JsonBuilder()
-//            def buildTime = {
-//                metric buildTimeArray[0].trim()
-//                metric_value buildTimeArray[1].trim()
-//            }
+            def buildTime = buildTimeArray[1].trim()
+            def startTime = startTimeArray[1].trim()
+            buildTime = buildTime.substring(0, buildTime.length() - 1)
+            startTime = startTime.substring(0, startTime.length() - 1)
 
-            def body = '{"project_id": "Android BenchMarking Test","metric_data": [{"metric": "build_time","metric_value":' + buildTimeArray[1].trim() + '},{"metric": "build_time","metric_value":' + startTimeArray[1].trim() + '}]}'
-//            def startTime = {
-//                metric startTimeArray[0].trim()
-//                metric_value startTimeArray[1].trim()
-//            }
-//            println(builder.toString().getBytes('UTF-8'))
+            def body = '{"project_id": "Android BenchMarking Test","metric_data": [{"metric": "build_time","metric_value":' + buildTime + '},{"metric": "build_time","metric_value":' + startTime + '}]}'
             println(body)
             def post = new URL("").openConnection() // TODO: Add the required URL
             post.setRequestMethod("POST")
