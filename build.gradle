@@ -28,7 +28,7 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-task getProfileHtmlData() {
+task postProfileData() {
     doLast {
         def names = []
         fileTree("build/reports/profile").visit { FileVisitDetails details ->
