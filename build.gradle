@@ -1,26 +1,114 @@
+import org.cyberneko.html.parsers.SAXParser
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-  ext.kotlin_version = "1.3.72"
-  repositories {
-    google()
-    jcenter()
-  }
-  dependencies {
-    classpath "com.android.tools.build:gradle:4.1.0"
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
-    // NOTE: Do not place your application dependencies here; they belong
-    // in the individual module build.gradle files
-  }
+    ext.kotlin_version = "1.3.72"
+    ext.nekohtml_version = "1.9.16"
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.1.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "net.sourceforge.nekohtml:nekohtml:$nekohtml_version"
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
 }
 
 allprojects {
-  repositories {
-    google()
-    jcenter()
-  }
+    repositories {
+        google()
+        jcenter()
+    }
 }
 
 task clean(type: Delete) {
-  delete rootProject.buildDir
+    delete rootProject.buildDir
+}
+
+task postProfileData() {
+    doLast {
+        def names = []
+        fileTree("build/reports/profile").visit { FileVisitDetails details ->
+            if (details.name.contains("html")) {
+                names << details.file.path
+            }
+        }
+        def parser = new SAXParser()
+        def result = ""
+        if (names.size() > 0 && file(names.get(0)).exists()) {
+            new XmlParser(parser).parseText(file(names.get(0)).text).with { page ->
+                List<Object> list = page.get("BODY")["DIV"]["DIV"]["DIV"]["TABLE"]
+                for (int i = 0; i < list.size(); i++) {
+                    List<Object> tr = list.get(i)["TBODY"]["TR"]
+                    for (int j = 0; j < tr.size(); j++) {
+                        List<Object> td = tr.get(j)["TD"]
+                        for (int k = 0; k < td.size(); k++) {
+                            Object object = td.get(k);
+                            result = result + object.text();
+                            if (k % 2 == 1) result = result + "\n" // Code formatting
+                            else result = result + " -> "
+                        }
+                    }
+                }
+            }
+            def array = result.split("\n");
+            def buildTimeArray = array[0].split(" -> ")
+            def startTimeArray = array[1].split(" -> ")
+            def buildTime = buildTimeArray[1].trim()
+            def startTime = startTimeArray[1].trim()
+            buildTime = buildTime.substring(0, buildTime.length() - 1)
+            startTime = startTime.substring(0, startTime.length() - 1)
+
+            def body = '{"project_id": "Android BenchMarking Test","metric_data": [{"metric": "build_time","metric_value":' + buildTime + '},{"metric": "build_time","metric_value":' + startTime + '}]}'
+            println(body)
+            def post = new URL("").openConnection() // TODO: Add the required URL
+            post.setRequestMethod("POST")
+            post.setDoOutput(true)
+            post.setRequestProperty("Content-Type", "application/json")
+            post.getOutputStream().write(body.getBytes("UTF-8"));
+            def postRC = post.getResponseCode();
+            println(postRC);
+            if (postRC.equals(200)) {
+                println(post.getInputStream().getText());
+            }
+        } else {
+            print("No such file exists. Please build the profile prior to running this task")
+        }
+    }
+}
+
+task postData() {
+    // POST
+    def post = new URL("https://cryptic-reef-02597.herokuapp.com/users").openConnection();
+    def message = '{"username":"latest","firsname":"test","lastname":"test","email":"test@deloitte.com","ssn":"asdxc"}'
+    post.setRequestMethod("POST")
+    post.setDoOutput(true)
+    post.setRequestProperty("Content-Type", "application/json")
+    post.getOutputStream().write(message.getBytes("UTF-8"));
+    def postRC = post.getResponseCode();
+    println(postRC);
+    if (postRC.equals(200)) {
+        println(post.getInputStream().getText());
+    }
+}
+
+ext {
+    //UI
+    recycler_view = '1.1.0'
+    glide = '4.11.0'
+
+    //Lifecycle
+    life_cycle = '2.2.0'
+
+    //network
+    retrofit = '2.9.0'
+    gson = '2.8.6'
+    gson_converter = retrofit
+    okhttp = '4.8.0'
+
+    //Coroutines
+    coroutines = '1.3.9'
 }

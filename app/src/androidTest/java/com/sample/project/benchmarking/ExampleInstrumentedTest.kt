@@ -1,4 +1,4 @@
-package com.deloitte.project.benchmarking
+package com.sample.project.benchmarking
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

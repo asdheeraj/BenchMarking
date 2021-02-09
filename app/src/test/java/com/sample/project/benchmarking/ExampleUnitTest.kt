@@ -1,4 +1,4 @@
-package com.deloitte.project.benchmarking
+package com.sample.project.benchmarking
 
 import org.junit.Test
 
